@@ -1,0 +1,14 @@
+# исходные данные: предоставляются вместе с заданием (672 МБ)
+data/
+
+# промежуточный кеш экспериментов и чанки эмбеддингов (пересчитываются)
+cache/
+
+__pycache__/
+.ipynb_checkpoints/
+.DS_Store
+
+# текст задания не публикуем
+ABOUT_TASK.md
+DATA_DESCRIPTION.md
+EXPECTED_RESULT.md
