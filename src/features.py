@@ -44,8 +44,8 @@ class FeatureBuilder:
         }).astype(np.float32).values
         self.item_feat_names = ['rating', 'reviews_log', 'price_log', 'phone_hidden', 'msg_forbidden', 'remote',
                                 'visit', 'title_len', 'desc_len_log', 'title_dups_log']
-        # Популярность объявления в train намеренно НЕ используем: в корпусе бенчмарка лишь ~10% объявлений
-        # встречались в train, а на валидации позитивы по построению берутся из train, и признак дал бы ложный прирост.
+        # Популярность объявления в train не используем: в корпусе бенчмарка лишь ~10% объявлений встречались
+        # в train, а на валидации все правильные ответы по построению из train, и признак переоценивался бы.
 
         # координаты объявлений и "центры" локаций поиска
         self.lat = to_float(items.item_latitude).values.astype(np.float32)

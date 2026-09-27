@@ -22,14 +22,14 @@ ITEM_COLS = ['item_id', 'item_title_raw', 'item_description_raw', 'item_infm_par
 
 
 QUERY_COLS = ['search_query', 'search_location_id', 'search_infm_params_text', 'search_category']
-MIN_CLEAN_TEXTS = 1000      # меньше этого чистой валидации и обучения ранкера не хватит
+MIN_CLEAN_TEXTS = 1000      # меньше этого валидации и обучения ранкера не хватит
 
 
 def check_inputs(train: pd.DataFrame, bq: pd.DataFrame, bi: pd.DataFrame) -> None:
     """Проверка, что входные файлы имеют ожидаемую структуру (см. README, раздел про входные данные).
 
     Падает с понятным сообщением, если нет нужных колонок или нарушена уникальность id,
-    и предупреждает, если в корпусе мало объявлений из train: на них строится чистая валидация.
+    и предупреждает, если в корпусе мало объявлений из train: на них строится валидация.
     """
     query_cols = QUERY_COLS + ['search_is_delivery_search']          # флаг доставки нужен только для EDA
     required = {'train': (train, query_cols + ITEM_COLS), 'benchmark_queries': (bq, ['query_id'] + query_cols),
@@ -47,7 +47,7 @@ def check_inputs(train: pd.DataFrame, bq: pd.DataFrame, bi: pd.DataFrame) -> Non
     share = train.item_id.isin(set(bi.item_id)).mean()
     print(f'Проверка входных данных пройдена. Строк train с объявлением из корпуса: {share:.1%}')
     if share < 0.01:
-        print('Внимание: объявлений из train в корпусе почти нет, чистую валидацию (split_in_corpus) не построить.')
+        print('Внимание: объявлений из train в корпусе почти нет, валидацию (split_in_corpus) не построить.')
 
 
 def load(data_dir='data'):
@@ -95,14 +95,9 @@ def build_corpus(bi: pd.DataFrame, *row_sets) -> pd.DataFrame:
 
 
 def split_in_corpus(train: pd.DataFrame, bi: pd.DataFrame, n_val=2500, seed=7):
-    """Разбиение без артефакта "позитив из train, дистракторы из корпуса".
+    """Разбиение для обучения и оценки ранкера.
 
-    В обычном разбиении позитивы отложенных сессий приходится добавлять в корпус, и они
-    систематически отличаются от "родных" объявлений benchmark_items (другой период, другие
-    статистики). Адверсариальная проверка отличает их с AUC около 0.69, и ранкер может выучить
-    этот артефакт вместо релевантности.
-
-    Здесь берём только сессии, где все выбранные объявления есть в benchmark_items
+    Берём только сессии, где все выбранные объявления есть в benchmark_items
     (~18k сессий, ~11k уникальных текстов). Корпус тогда ровно benchmark_items, как в бенчмарке.
     Тексты делятся на val (n_val, но не больше четверти) и rank (остальные), по одной сессии на текст.
     """
